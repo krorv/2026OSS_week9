@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>친구 관리</title>
+    <style>
+        body {
+            background-color: #e9d8d7;
+            margin: 20px;
+            max-width: 800px;
+            padding: 20px;
+        }
+        h2 { color: black; }
+        div { margin-bottom: 20px; }
+        input, button { margin: 5px; padding: 5px; }
+        table {
+            background-color: white;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td { padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }   
+        .edit-btn, .delete-btn {
+            background-color: #d5618e;  
+            color: white;
+            border: none;
+            padding: 5px 10px;
+        }
+        tr:hover { background-color: #f0f0f0; }
+        button:hover { opacity: 0.8; cursor: pointer; }
+        .search-container {
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>친구 추가 / 수정</h2>
+    <div>
+        <input type="hidden" id="edit-id">
+        <input type="text" id="name" placeholder="이름">
+        <input type="text" id="relation" placeholder="관계">
+        <input type="text" id="phone" placeholder="전화번호">
+        <input type="email" id="email" placeholder="이메일">
+        <input type="date" id="birthday">
+        <button id="submit-btn" onclick="addOrUpdateFriend()">추가</button>
+        <button id="cancel-btn" onclick="resetForm()" style="display:none;">취소</button>
+    </div>
+
+    <hr>
+    
+    <h2>친구 목록</h2>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="이름 또는 관계 검색..." oninput="searchFriends()">
+    </div>
+    <p id="message" style="color: #c0392b;"></p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>이름</th>
+                <th>관계</th>
+                <th>전화번호</th>
+                <th>이메일</th>
+                <th>생일</th>
+                <th>수정</th>
+                <th>삭제</th>
+            </tr>
+        </thead>
+        <tbody id="friendList">
+        </tbody>
+    </table>
+
+    <script>
+    const API_URL = "https://6adea6de4e88f1bba453a3b.mockapi.io/Friends";
+
+    let friends = [];   // 화면 표시용
+    //서버에서 목록 가져오기
+    async function loadFriends() {
+        try {
+            const response = await fetch(API_URL);//response로 받아오기
+            if (!response.ok) {//만약 없으면?
+                throw new Error(`서버 오류 (${response.status})`)//에러메세지
+            }
+            friends = await response.json();//json type으로 변환
+            renderFriends(friends);//renderFriends에 보내기
+            showMessage("");//메세지 없애기
+        } catch (error) {
+            showMessage("목록을 불러오지 못했어요: " + error.message);
+        }
+    }
+
+   //배열을 표로 바꾸기
+    function renderFriends(list) {
+        const tbody = document.getElementById("friendList");
+        let html = "";
+
+        for (const f of list) {//list에서 꺼내오기
+            html += `<tr>
+                        <td>${f.name}</td>
+                        <td>${f.relation}</td>
+                        <td>${f.phone}</td>
+                        <td>${f.email}</td>
+                        <td>${f.birthday}</td>
+                        <td><button class="edit-btn" onclick="startEdit('${f.id}')">수정</button></td>
+                        <td><button class="delete-btn" onclick="deleteFriend('${f.id}')">삭제</button></td>
+                     </tr>`;
+        }
+
+        tbody.innerHTML = html;
+    }
+
+    //오류 메시지 출력
+    function showMessage(text) {
+        document.getElementById("message").textContent = text;
+    }
+
+    //페이지가 열리면 바로 실행
+    loadFriends();
+
+    async function addFriend(friend) {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(friend)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        await loadFriends();
+    }
+
+
+</script>
+</body>
+</html>

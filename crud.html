@@ -133,21 +133,49 @@
 
         await loadFriends();//추가 후에 다시 불러오기..
     }
-     async function addOrUpdateFriend() {
-        const friend = {//friend객체 만들기
-            name: document.getElementById("name").value,//value값 가져오기
-            relation: document.getElementById("relation").value,
-            phone: document.getElementById("phone").value,
-            email: document.getElementById("email").value,
-            birthday: document.getElementById("birthday").value
+         async function addOrUpdateFriend() {
+        const friend = {
+            name: document.querySelector("#name").value,
+            relation: document.querySelector("#relation").value,
+            phone: document.querySelector("#phone").value,
+            email: document.querySelector("#email").value,
+            birthday: document.querySelector("#birthday").value
         };
 
         try {
-            await addFriend(friend);//addfriend로 추가하기
-            showMessage("");//서버실패 메세지 지우기
-        } catch (error) {//안되면?
-            showMessage("추가 실패: " + error.message);//오류메세지 띄우기
+            if (editingId === null) {
+                await addFriend(friend);                  // 추가함
+            } else {
+                await updateFriend(editingId, friend);    // 수정
+                editingId = null;                        
+                document.querySelector("#submit-btn").textContent = "추가";
+            }
+
+            document.querySelector("#name").value = "";
+            document.querySelector("#relation").value = "";
+            document.querySelector("#phone").value = "";
+            document.querySelector("#email").value = "";
+            document.querySelector("#birthday").value = "";
+
+            showMessage("");
+        } catch (error) {
+            showMessage("요청 실패: " + error.message);
         }
+    }
+    async function updateFriend(id, updatedData) {
+        const response = await fetch(`${API_URL}/${id}`, {  
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        await loadFriends();
     }
 
 

@@ -177,7 +177,90 @@
 
         await loadFriends();
     }
+    async function deleteFriend(id) {
+        if (!confirm("정말 삭제하시겠습니까?")) {
+            return;                                   
+        }
 
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE"                      
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            await loadFriends();                      
+            showMessage("");
+        } catch (error) {
+            showMessage("삭제 실패: " + error.message);
+        }
+    }
+    function validateForm() {
+    const friendForm = document.querySelector("#friendForm");
+    const nameInput = document.querySelector("#name");
+    const phoneInput = document.querySelector("#phone");
+    const emailInput = document.querySelector("#email");
+
+    if (!friendForm.checkValidity()) {
+        showMessage("모든 필드를 올바르게 입력해 주세요.");
+        return false;
+    }
+
+    if (nameInput.value.trim().length < 2) {
+        showMessage("이름은 최소 2글자 이상이어야 합니다.");
+        nameInput.focus();
+        return false;
+    }
+
+    if (phoneInput.value.trim().length < 9) {
+        showMessage("전화번호는 최소 9자리 이상이어야 합니다.");
+        phoneInput.focus();
+        return false;
+    }
+
+    if (!emailInput.value.includes("@")) {
+        showMessage("이메일 형식이 올바르지 않습니다. (@ 포함)");
+        emailInput.focus();
+        return false;
+    }
+
+    return true;
+}
+document.querySelector("#friendForm").addEventListener("submit", async function(event) {
+    event.preventDefault(); // 기본 폼 전송 동작 중단
+
+    if (!validateForm()) return; // 유효성 검사 실패 시 중단
+
+    const friendData = {
+        name: document.querySelector("#name").value,
+        relation: document.querySelector("#relation").value,
+        phone: document.querySelector("#phone").value,
+        email: document.querySelector("#email").value,
+        birthday: document.querySelector("#birthday").value
+    };
+
+    try {
+        if (editingId === null) {
+            await addFriend(friendData);                  
+        } else {
+            await updateFriend(editingId, friendData);   
+            editingId = null;                        
+            document.querySelector("#submit-btn").textContent = "추가";
+        }
+
+        document.querySelector("#friendForm").reset();
+        showMessage("");
+    } catch (error) {
+        showMessage("요청 실패: " + error.message);
+    }
+});
+    document.querySelector("#searchInput").addEventListener("input", function() {
+    const query = this.value.toLowerCase();
+    const filtered = friends.filter(f =>f.name.toLowerCase().includes(query) ||f.relation.toLowerCase().includes(query));
+    renderFriends(filtered);
+});
 
 </script>
 </body>

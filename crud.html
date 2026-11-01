@@ -73,8 +73,7 @@
     </table>
 
     <script>
-    const API_URL = "https://6adea6de4e88f1bba453a3b.mockapi.io/Friends";
-
+    const API_URL = "https://6adea6de4e88f1bba4a53a3b.mockapi.io/Friends";
     let friends = [];   // 화면 표시용
     //서버에서 목록 가져오기
     async function loadFriends() {
@@ -121,18 +120,34 @@
 
     async function addFriend(friend) {
         const response = await fetch(API_URL, {
-            method: "POST",
+            method: "POST",//post로 추가!
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json"//json type으로 보내겟다
             },
-            body: JSON.stringify(friend)
+            body: JSON.stringify(friend)//json 들어있음
         });
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        await loadFriends();
+        await loadFriends();//추가 후에 다시 불러오기..
+    }
+     async function addOrUpdateFriend() {
+        const friend = {//friend객체 만들기
+            name: document.getElementById("name").value,//value값 가져오기
+            relation: document.getElementById("relation").value,
+            phone: document.getElementById("phone").value,
+            email: document.getElementById("email").value,
+            birthday: document.getElementById("birthday").value
+        };
+
+        try {
+            await addFriend(friend);//addfriend로 추가하기
+            showMessage("");//서버실패 메세지 지우기
+        } catch (error) {//안되면?
+            showMessage("추가 실패: " + error.message);//오류메세지 띄우기
+        }
     }
 
 

@@ -98,14 +98,12 @@
         let html = "";
 
         for (const f of list) {
-            const relation = f.relationship || f.relation || "";
-            const birthdate = f.birthdate || f.birthday || "";//list에서 꺼내오기
             html += `<tr>
                         <td>${f.name}</td>
-                        <td>${f.relation}</td>
+                        <td>${f.relationship || f.relation || ""}</td>
                         <td>${f.phone}</td>
                         <td>${f.email}</td>
-                        <td>${f.birthday}</td>
+                        <td>${f.birthdate || f.birthday || ""}</td>
                         <td><button class="edit-btn" onclick="startEdit('${f.id}')">수정</button></td>
                         <td><button class="delete-btn" onclick="deleteFriend('${f.id}')">삭제</button></td>
                      </tr>`;
@@ -165,10 +163,10 @@
 
         editingId = id;
         document.querySelector("#name").value = target.name;
-        document.querySelector("#relation").value = target.relation;
+        document.querySelector("#relation").value = target.relationship || target.relation || "";
         document.querySelector("#phone").value = target.phone;
         document.querySelector("#email").value = target.email;
-        document.querySelector("#birthday").value = target.birthday;
+        document.querySelector("#birthday").value = target.birthdate || target.birthday || "";
 
         document.querySelector("#submit-btn").textContent = "수정 완료";
         document.querySelector("#cancel-btn").style.display = "inline-block";
